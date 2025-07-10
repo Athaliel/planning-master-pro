@@ -1,15 +1,17 @@
-// firebase.js
+// src/firebase.js
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "TON_API_KEY",
-  authDomain: "TON_PROJECT_ID.firebaseapp.com",
-  projectId: "TON_PROJECT_ID",
-  storageBucket: "TON_PROJECT_ID.appspot.com",
-  messagingSenderId: "TON_MESSAGING_ID",
-  appId: "TON_APP_ID"
+  apiKey: "AIzaSyBg4T A918AbJU2e_Gn7Qi_Cd1ugj1fy2SM",
+  authDomain: "planning-master-pro.firebaseapp.com",
+  projectId: "planning-master-pro",
+  storageBucket: "planning-master-pro.appspot.com",
+  messagingSenderId: "676884141699",
+  appId: "1:676884141699:web:5e955d668e6fa8d1f77016"
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+const db = getFirestore(app);
+
+export default db;
