@@ -127,21 +127,34 @@ setSelectedSlots([...selectedSlots, slot]);
 }
 };
 
-const saveStudentPreferences = () => {
-if (selectedStudent && selectedSlots.length === 4 && !hasSubmitted) {
-const duration = getStudentDuration(selectedStudent);
-setStudentPreferences({
-...studentPreferences,
-[selectedStudent]: {
-duration,
-slots: selectedSlots,
-timestamp: new Date().toISOString()
-}
-});
-setHasSubmitted(true);
-alert('Préférences enregistrées avec succès !');
-}
+const saveStudentPreferences = async () => {
+  if (selectedStudent && selectedSlots.length === 4 && !hasSubmitted) {
+    const duration = getStudentDuration(selectedStudent);
+    const newPreferences = {
+      duration,
+      slots: selectedSlots,
+      timestamp: new Date().toISOString()
+    };
+
+    setStudentPreferences({
+      ...studentPreferences,
+      [selectedStudent]: newPreferences
+    });
+
+    try {
+      await addDoc(collection(db, 'eleves'), {
+        student: selectedStudent,
+        ...newPreferences
+      });
+      setHasSubmitted(true);
+      alert('Préférences enregistrées avec succès !');
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement Firebase :", error);
+      alert("Erreur lors de la sauvegarde.");
+    }
+  }
 };
+
 
 const runGlobalOptimization = () => {
 setIsOptimizing(true);
