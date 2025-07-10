@@ -958,8 +958,6 @@ Imprimer le planning
 </button>
 <button
 onClick={() => {
-const csvContent = "data:text/csv;charset=utf-8," +
-"Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
 const csvContent =
   "data:text/csv;charset=utf-8," +
   "Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
