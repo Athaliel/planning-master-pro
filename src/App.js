@@ -960,14 +960,23 @@ Imprimer le planning
 onClick={() => {
 const csvContent = "data:text/csv;charset=utf-8," +
 "Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
-finalSchedule
-.filter(a => a.slot)
-.map(a => ${a.student},${a.slot.day},${a.slot.startTime},${a.slot.endTime},${a.duration},${a.preferenceRank})
-.join("\n");
+const csvContent =
+  "data:text/csv;charset=utf-8," +
+  "Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
+  finalSchedule
+    .filter((a) => a.slot)
+    .map(
+      (a) =>
+        `${a.student},${a.slot.day},${a.slot.startTime},${a.slot.endTime},${a.duration},${a.preferenceRank}`
+    )
+    .join("\n");
 const encodedUri = encodeURI(csvContent);
 const link = document.createElement("a");
 link.setAttribute("href", encodedUri);
 link.setAttribute("download", "planning_cours_musique.csv");
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
 document.body.appendChild(link);
 link.click();
 document.body.removeChild(link);
