@@ -49,6 +49,28 @@ const timeSlots = {
 const [currentView, setCurrentView] = useState('student');
 const [selectedStudent, setSelectedStudent] = useState('');
 const [studentPreferences, setStudentPreferences] = useState({});
+useEffect(() => {
+  const fetchPreferences = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'eleves'));
+      const prefs = {};
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        prefs[data.student] = {
+          duration: data.duration,
+          slots: data.slots,
+          timestamp: data.timestamp
+        };
+      });
+      setStudentPreferences(prefs);
+    } catch (error) {
+      console.error("Erreur lors du chargement Firebase :", error);
+    }
+  };
+
+  fetchPreferences();
+}, []);
+
 const [selectedSlots, setSelectedSlots] = useState([]);
 const [hasSubmitted, setHasSubmitted] = useState(false);
 const [optimizationCompleted, setOptimizationCompleted] = useState(false);
