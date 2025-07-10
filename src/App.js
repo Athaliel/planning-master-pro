@@ -75,7 +75,25 @@ const [selectedSlots, setSelectedSlots] = useState([]);
 const [hasSubmitted, setHasSubmitted] = useState(false);
 const [optimizationCompleted, setOptimizationCompleted] = useState(false);
 const [finalSchedule, setFinalSchedule] = useState([]);
+
+useEffect(() => {
+  const fetchSchedule = async () => {
+    if (isTeacherLoggedIn) {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'planning'));
+        const data = querySnapshot.docs.map(doc => doc.data());
+        setFinalSchedule(data);
+      } catch (error) {
+        console.error("Erreur lors de la récupération du planning :", error);
+      }
+    }
+  };
+
+  fetchSchedule();
+}, [isTeacherLoggedIn]);
+
 const [isOptimizing, setIsOptimizing] = useState(false);
+
 const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
 const [teacherPassword, setTeacherPassword] = useState('');
 const [showPassword, setShowPassword] = useState(false);
