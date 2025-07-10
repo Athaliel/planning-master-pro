@@ -236,9 +236,20 @@ return assignments;
 };
 
 const optimizedSchedule = optimizeSchedule();
+
+// Sauvegarde dans Firebase
+optimizedSchedule.forEach(async (entry) => {
+  try {
+    await addDoc(collection(db, 'planning'), entry);
+  } catch (error) {
+    console.error("Erreur lors de l'enregistrement du planning :", error);
+  }
+});
+
 setFinalSchedule(optimizedSchedule);
 setOptimizationCompleted(true);
 setIsOptimizing(false);
+
 }, 2000);
 };
 
