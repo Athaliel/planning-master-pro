@@ -94,6 +94,29 @@ useEffect(() => {
 
 const [isOptimizing, setIsOptimizing] = useState(false);
 
+useEffect(() => {
+  const fetchPreferences = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'eleves'));
+      const prefs = {};
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        prefs[data.student] = {
+          duration: data.duration,
+          slots: data.slots,
+          timestamp: data.timestamp
+        };
+      });
+      setStudentPreferences(prefs);
+    } catch (error) {
+      console.error("Erreur de récupération des données Firebase :", error);
+    }
+  };
+
+  fetchPreferences();
+}, []);
+
+
 const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
 const [teacherPassword, setTeacherPassword] = useState('');
 const [showPassword, setShowPassword] = useState(false);
