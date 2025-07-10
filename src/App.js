@@ -957,32 +957,27 @@ className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 round
 Imprimer le planning
 </button>
 <button
-onClick={() => {
-const csvContent =
-  "data:text/csv;charset=utf-8," +
-  "Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
-  finalSchedule
-    .filter((a) => a.slot)
-    .map(
-      (a) =>
-        `${a.student},${a.slot.day},${a.slot.startTime},${a.slot.endTime},${a.duration},${a.preferenceRank}`
-    )
-    .join("\n");
-const encodedUri = encodeURI(csvContent);
-const link = document.createElement("a");
-link.setAttribute("href", encodedUri);
-link.setAttribute("download", "planning_cours_musique.csv");
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
-document.body.appendChild(link);
-link.click();
-document.body.removeChild(link);
-}}
-className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-green-600 hover:to-emerald-600 transition-all transform hover:scale-105 shadow-xl"
+  onClick={() => {
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      "Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
+      finalSchedule
+        .filter((a) => a.slot)
+        .map(
+          (a) =>
+            `${a.student},${a.slot.day},${a.slot.startTime},${a.slot.endTime},${a.duration},${a.preferenceRank}`
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "planning_cours_musique.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }}
 >
-<FileText className="w-5 h-5 inline mr-3" />
-Exporter CSV
+  Exporter CSV
 </button>
 </div>
 </div>
