@@ -205,6 +205,25 @@ const importStudentsToFirestore = async () => {
   }, [isTeacherLoggedIn]);
 
   const runGlobalOptimization = () => {
+const organizeScheduleByTime = (assignments) => {
+const organized = {};
+
+assignments.forEach(assignment => {
+if (assignment.slot) {
+const day = assignment.slot.day;
+if (!organized[day]) organized[day] = [];
+organized[day].push(assignment);
+}
+});
+
+Object.keys(organized).forEach(day => {
+organized[day].sort((a, b) => {
+return a.slot.startTime.localeCompare(b.slot.startTime);
+});
+});
+
+return organized;
+};
     setIsOptimizing(true);
 
     setTimeout(() => {
@@ -262,25 +281,7 @@ const importStudentsToFirestore = async () => {
   return (
     <div className="App">
 
-const organizeScheduleByTime = (assignments) => {
-const organized = {};
 
-assignments.forEach(assignment => {
-if (assignment.slot) {
-const day = assignment.slot.day;
-if (!organized[day]) organized[day] = [];
-organized[day].push(assignment);
-}
-});
-
-Object.keys(organized).forEach(day => {
-organized[day].sort((a, b) => {
-return a.slot.startTime.localeCompare(b.slot.startTime);
-});
-});
-
-return organized;
-};
 
 const organizedSchedule = organizeScheduleByTime(finalSchedule);
 
