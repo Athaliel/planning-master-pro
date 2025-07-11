@@ -27,6 +27,24 @@ const [showPassword, setShowPassword] = useState(false);
 const [loginError, setLoginError] = useState('');
 const [availableSlots, setAvailableSlots] = useState([]);
 const [inscriptions, setInscriptions] = useState([]);
+useEffect(() => {
+  const fetchInscriptions = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'preferences'));
+      const data = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setInscriptions(data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des inscriptions :", error);
+    }
+  };
+
+  if (isTeacherLoggedIn) {
+    fetchInscriptions();
+  }
+}, [isTeacherLoggedIn]);
 
 
 const TEACHER_PASSWORD = 'musique2025';
