@@ -289,11 +289,12 @@ const totalResponses = Object.keys(studentPreferences).length;
 const successfulAssignments = finalSchedule.filter(a => a.slot).length;
 const conflicts = finalSchedule.filter(a => a.status === 'conflit').length;
 const satisfactionScore = finalSchedule.reduce((score, assignment) => {
-if (assignment.preferenceRank) {
-return score + (5 - assignment.preferenceRank);
-}
-return score;
+  if (assignment.preferenceRank) {
+    return score + (5 - assignment.preferenceRank);
+  }
+  return score;
 }, 0);
+
 const maxPossibleScore = totalResponses * 4;
 const satisfactionPercentage = totalResponses > 0 ? Math.round((satisfactionScore / maxPossibleScore) * 100) : 0;
 
