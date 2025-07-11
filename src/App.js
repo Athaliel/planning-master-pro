@@ -1,8 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Users, CheckCircle, AlertCircle, Music, Piano, UserCheck, UserX, TrendingUp, Play, FileText, Lock, Eye, EyeOff, Star, Target, Lightbulb } from 'lucide-react';
-import { db } from './firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
-
+import React, { useState, useEffect } from "react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  CheckCircle,
+  AlertCircle,
+  Music,
+  Piano,
+  UserCheck,
+  UserX,
+  TrendingUp,
+  Play,
+  FileText,
+  Lock,
+  Eye,
+  EyeOff,
+  Star,
+  Target,
+  Lightbulb,
+} from "lucide-react";
+import { db } from "./firebase";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 export default function MusicScheduleOptimizer() {
 const students = [
 { name: "Martin Léa", duration: 30 },
@@ -55,260 +73,194 @@ const importStudentsToFirestore = async () => {
   }
 };
 
-const timeSlots = {
-'Lundi': { start: 12, end: 20 },
-'Mardi': { start: 12, end: 18 },
-'Jeudi': { start: 12, end: 18 },
-'Samedi': { start: 8, end: 13 }
-};
+  const timeSlots = {
+    Lundi: { start: 12, end: 20 },
+    Mardi: { start: 12, end: 18 },
+    Jeudi: { start: 12, end: 18 },
+    Samedi: { start: 8, end: 13 },
+  };
 
-const [currentView, setCurrentView] = useState('student');
-const [selectedStudent, setSelectedStudent] = useState('');
-const [studentPreferences, setStudentPreferences] = useState({});
-useEffect(() => {
-  const fetchPreferences = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'eleves'));
-      const prefs = {};
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        prefs[data.student] = {
-          duration: data.duration,
-          slots: data.slots,
-          timestamp: data.timestamp
-        };
-      });
-      setStudentPreferences(prefs);
-    } catch (error) {
-      console.error("Erreur lors du chargement Firebase :", error);
+  const [currentView, setCurrentView] = useState("student");
+  const [selectedStudent, setSelectedStudent] = useState("");
+  const [studentPreferences, setStudentPreferences] = useState({});
+  const [selectedSlots, setSelectedSlots] = useState([]);
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [optimizationCompleted, setOptimizationCompleted] = useState(false);
+  const [finalSchedule, setFinalSchedule] = useState([]);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
+  const [teacherPassword, setTeacherPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState("");
+  const [availableSlots, setAvailableSlots] = useState([]);
+
+  const TEACHER_PASSWORD = "musique2025";
+
+  const handleTeacherLogin = () => {
+    if (teacherPassword === TEACHER_PASSWORD) {
+      setIsTeacherLoggedIn(true);
+      setLoginError("");
+      setTeacherPassword("");
+    } else {
+      setLoginError("Mot de passe incorrect");
+      setTimeout(() => setLoginError(""), 3000);
     }
   };
 
-  fetchPreferences();
-}, []);
+  const handleTeacherLogout = () => {
+    setIsTeacherLoggedIn(false);
+    setCurrentView("student");
+  };
 
-const [selectedSlots, setSelectedSlots] = useState([]);
-const [hasSubmitted, setHasSubmitted] = useState(false);
-const [optimizationCompleted, setOptimizationCompleted] = useState(false);
-const [finalSchedule, setFinalSchedule] = useState([]);
+  const generateTimeSlots = (duration) => {
+    const slots = [];
+    Object.entries(timeSlots).forEach(([day, hours]) => {
+      for (let hour = hours.start; hour <= hours.end - duration / 60; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          if ((hour + (minute + duration) / 60 <= hours.end)) {
+            const startTime = `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+            const endHour = Math.floor((hour * 60 + minute + duration) / 60);
+            const endMinute = (hour * 60 + minute + duration) % 60;
+            const endTime = `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}`;
+            slots.push({
+              id: `${day}-${startTime}-${duration}`,
+              day,
+              startTime,
+              endTime,
+              duration,
+              display: `${day} ${startTime}-${endTime}`,
+            });
+          }
+        }
+      }
+    });
+    return slots;
+  };
 
-useEffect(() => {
-  const fetchSchedule = async () => {
-    if (isTeacherLoggedIn) {
+  const getStudentDuration = (studentName) => {
+    const student = students.find((s) => s.name === studentName);
+    return student ? student.duration : 30;
+  };
+
+  useEffect(() => {
+    if (selectedStudent) {
+      const duration = getStudentDuration(selectedStudent);
+      setAvailableSlots(generateTimeSlots(duration));
+      setSelectedSlots([]);
+      setHasSubmitted(!!studentPreferences[selectedStudent]);
+    }
+  }, [selectedStudent, studentPreferences]);
+
+  const handleSlotSelection = (slot) => {
+    if (hasSubmitted) return;
+    if (selectedSlots.find((s) => s.id === slot.id)) {
+      setSelectedSlots(selectedSlots.filter((s) => s.id !== slot.id));
+    } else if (selectedSlots.length < 4) {
+      setSelectedSlots([...selectedSlots, slot]);
+    }
+  };
+
+  const saveStudentPreferences = async () => {
+    if (selectedStudent && selectedSlots.length === 4 && !hasSubmitted) {
+      const duration = getStudentDuration(selectedStudent);
+      const newPreferences = {
+        duration,
+        slots: selectedSlots,
+        timestamp: new Date().toISOString(),
+      };
+
+      setStudentPreferences({
+        ...studentPreferences,
+        [selectedStudent]: newPreferences,
+      });
+
       try {
-        const querySnapshot = await getDocs(collection(db, 'planning'));
-        const data = querySnapshot.docs.map(doc => doc.data());
-        setFinalSchedule(data);
+        await addDoc(collection(db, "eleves"), {
+          student: selectedStudent,
+          ...newPreferences,
+        });
+        setHasSubmitted(true);
+        alert("Préférences enregistrées avec succès !");
       } catch (error) {
-        console.error("Erreur lors de la récupération du planning :", error);
+        console.error("Erreur lors de l'enregistrement Firebase :", error);
+        alert("Erreur lors de la sauvegarde.");
       }
     }
   };
 
-  fetchSchedule();
-}, [isTeacherLoggedIn]);
-
-const [isOptimizing, setIsOptimizing] = useState(false);
-
-useEffect(() => {
-  const fetchPreferences = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, 'eleves'));
-      const prefs = {};
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        prefs[data.student] = {
-          duration: data.duration,
-          slots: data.slots,
-          timestamp: data.timestamp
-        };
-      });
-      setStudentPreferences(prefs);
-    } catch (error) {
-      console.error("Erreur de récupération des données Firebase :", error);
-    }
-  };
-
-  fetchPreferences();
-}, []);
-
-
-const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
-const [teacherPassword, setTeacherPassword] = useState('');
-const [showPassword, setShowPassword] = useState(false);
-const [loginError, setLoginError] = useState('');
-const [availableSlots, setAvailableSlots] = useState([]);
-
-const TEACHER_PASSWORD = 'musique2025';
-
-const handleTeacherLogin = () => {
-if (teacherPassword === TEACHER_PASSWORD) {
-setIsTeacherLoggedIn(true);
-setLoginError('');
-setTeacherPassword('');
-} else {
-setLoginError('Mot de passe incorrect');
-setTimeout(() => setLoginError(''), 3000);
-}
-};
-
-const handleTeacherLogout = () => {
-setIsTeacherLoggedIn(false);
-setCurrentView('student');
-};
-
-const generateTimeSlots = (duration) => {
-const slots = [];
-Object.entries(timeSlots).forEach(([day, hours]) => {
-for (let hour = hours.start; hour <= hours.end - (duration / 60); hour++) {
-for (let minute = 0; minute < 60; minute += 15) {
-if (hour + (minute + duration) / 60 <= hours.end) {
-const startTime = hour.toString().padStart(2, '0') + ':' + minute.toString().padStart(2, '0');
-const endHour = Math.floor((hour * 60 + minute + duration) / 60);
-const endMinute = (hour * 60 + minute + duration) % 60;
-const endTime = endHour.toString().padStart(2, '0') + ':' + endMinute.toString().padStart(2, '0');
-slots.push({
-id: day + '-' + startTime + '-' + duration,
-day,
-startTime,
-endTime,
-duration,
-display: day + ' ' + startTime + '-' + endTime
-});
-}
-}
-}
-});
-return slots;
-};
-
-const getStudentDuration = (studentName) => {
-const student = students.find(s => s.name === studentName);
-return student ? student.duration : 30;
-};
-
-useEffect(() => {
-if (selectedStudent) {
-const duration = getStudentDuration(selectedStudent);
-setAvailableSlots(generateTimeSlots(duration));
-setSelectedSlots([]);
-setHasSubmitted(!!studentPreferences[selectedStudent]);
-}
-}, [selectedStudent, studentPreferences]);
-
-const handleSlotSelection = (slot) => {
-if (hasSubmitted) return;
-
-if (selectedSlots.find(s => s.id === slot.id)) {
-setSelectedSlots(selectedSlots.filter(s => s.id !== slot.id));
-} else if (selectedSlots.length < 4) {
-setSelectedSlots([...selectedSlots, slot]);
-}
-};
-
-const saveStudentPreferences = async () => {
-  if (selectedStudent && selectedSlots.length === 4 && !hasSubmitted) {
-    const duration = getStudentDuration(selectedStudent);
-    const newPreferences = {
-      duration,
-      slots: selectedSlots,
-      timestamp: new Date().toISOString()
+  useEffect(() => {
+    const fetchSchedule = async () => {
+      if (isTeacherLoggedIn) {
+        try {
+          const querySnapshot = await getDocs(collection(db, "planning"));
+          const data = querySnapshot.docs.map((doc) => doc.data());
+          setFinalSchedule(data);
+        } catch (error) {
+          console.error("Erreur lors de la récupération du planning :", error);
+        }
+      }
     };
 
-    setStudentPreferences({
-      ...studentPreferences,
-      [selectedStudent]: newPreferences
-    });
+    fetchSchedule();
+  }, [isTeacherLoggedIn]);
 
-    try {
-      await addDoc(collection(db, 'eleves'), {
-        student: selectedStudent,
-        ...newPreferences
-      });
-      setHasSubmitted(true);
-      alert('Préférences enregistrées avec succès !');
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement Firebase :", error);
-      alert("Erreur lors de la sauvegarde.");
-    }
-  }
-};
+  const runGlobalOptimization = () => {
+    setIsOptimizing(true);
 
+    setTimeout(() => {
+      const studentsEntries = Object.entries(studentPreferences);
+      if (studentsEntries.length === 0) {
+        setIsOptimizing(false);
+        return;
+      }
 
-const runGlobalOptimization = () => {
-setIsOptimizing(true);
+      const slotsOverlap = (slot1, slot2) => {
+        if (slot1.day !== slot2.day) return false;
+        const start1 = parseInt(slot1.startTime.replace(":", ""));
+        const end1 = parseInt(slot1.endTime.replace(":", ""));
+        const start2 = parseInt(slot2.startTime.replace(":", ""));
+        const end2 = parseInt(slot2.endTime.replace(":", ""));
+        return !(end1 <= start2 || end2 <= start1);
+      };
 
-setTimeout(() => {
-const studentsEntries = Object.entries(studentPreferences);
-if (studentsEntries.length === 0) {
-setIsOptimizing(false);
-return;
-}
+      const optimizeSchedule = () => {
+        const assignments = [];
+        const usedSlots = [];
 
-const slotsOverlap = (slot1, slot2) => {
-if (slot1.day !== slot2.day) return false;
-const start1 = parseInt(slot1.startTime.replace(':', ''));
-const end1 = parseInt(slot1.endTime.replace(':', ''));
-const start2 = parseInt(slot2.startTime.replace(':', ''));
-const end2 = parseInt(slot2.endTime.replace(':', ''));
-return !(end1 <= start2 || end2 <= start1);
-};
+        studentsEntries.forEach(([studentName, prefs]) => {
+          let assigned = false;
+          for (let i = 0; i < prefs.slots.length; i++) {
+            const slot = prefs.slots[i];
+            const hasConflict = usedSlots.some((usedSlot) => slotsOverlap(slot, usedSlot));
+            if (!hasConflict) {
+              assignments.push({
+                student: studentName,
+                slot,
+                duration: prefs.duration,
+                preferenceRank: i + 1,
+              });
+              usedSlots.push(slot);
+              assigned = true;
+              break;
+            }
+          }
+          if (!assigned) {
+            assignments.push({ student: studentName, slot: null });
+          }
+        });
 
-const optimizeSchedule = () => {
-const assignments = [];
-const usedSlots = [];
+        return assignments;
+      };
 
-studentsEntries.forEach(([studentName, prefs]) => {
-let assigned = false;
-for (let i = 0; i < prefs.slots.length; i++) {
-const slot = prefs.slots[i];
-const hasConflict = usedSlots.some(usedSlot => slotsOverlap(slot, usedSlot));
+      const optimizedSchedule = optimizeSchedule();
+      setFinalSchedule(optimizedSchedule);
+      setOptimizationCompleted(true);
+      setIsOptimizing(false);
+    }, 2000);
+  };
 
-if (!hasConflict) {
-assignments.push({
-student: studentName,
-slot: slot,
-duration: prefs.duration,
-preferenceRank: i + 1,
-preferences: prefs.slots
-});
-usedSlots.push(slot);
-assigned = true;
-break;
-}
-}
-
-if (!assigned) {
-assignments.push({
-student: studentName,
-slot: null,
-duration: prefs.duration,
-status: 'conflit',
-preferences: prefs.slots
-});
-}
-});
-
-return assignments;
-};
-
-const optimizedSchedule = optimizeSchedule();
-console.log(optimizedSchedule); // 👈 debug
-// Sauvegarde dans Firebase
-optimizedSchedule.forEach(async (entry) => {
-  try {
-    await addDoc(collection(db, 'planning'), entry);
-  } catch (error) {
-    console.error("Erreur lors de l'enregistrement du planning :", error);
-  }
-});
-
-setFinalSchedule(optimizedSchedule);
-setOptimizationCompleted(true);
-setIsOptimizing(false);
-
-}, 2000);
-};
+  return (
+    <div className="App">
 
 const organizeScheduleByTime = (assignments) => {
 const organized = {};
