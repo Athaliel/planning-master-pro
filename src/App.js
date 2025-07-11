@@ -688,45 +688,35 @@ Lancer l'optimisation
   </div>
 ) : (
   <div className="grid gap-4">
-    {inscriptions.map((entry, index) => (
-      <div
-        key={index}
-        className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"
-      >
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="font-semibold text-gray-800">{entry.student}</h4>
-          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-            {entry.duration} min
-          </span>
-        </div>
-        <div className="text-sm text-gray-600">
-          <strong>Préférences :</strong>
-          <ol className="list-decimal list-inside mt-1 space-y-1">
-            {entry.slots.map((slot, index) => (
-              <li key={index}>
-                {slot.day} de {slot.start}h à {slot.end}h
+<div className="mt-10">
+  <h3 className="text-xl font-bold mb-4">Préférences des élèves</h3>
+  {inscriptions.length === 0 ? (
+    <p className="text-gray-500">Aucune inscription enregistrée.</p>
+  ) : (
+    <ul className="space-y-4">
+      {inscriptions.map((entry, index) => (
+        <li
+          key={index}
+          className="bg-white rounded-xl shadow-md p-4 border border-gray-200"
+        >
+          <p className="font-semibold text-red-700">{entry.student}</p>
+          <p className="text-sm text-gray-600 mb-1">
+            Durée : {entry.duration} minutes
+          </p>
+          <p className="text-sm text-gray-600">Préférences :</p>
+          <ul className="list-disc list-inside text-sm text-gray-800">
+            {entry.slots.map((slot, i) => (
+              <li key={i}>
+                Choix {i + 1} : {slot.day} de {slot.start}h à {slot.end}h
               </li>
             ))}
-          </ol>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
-        <div className="text-sm text-gray-600">
-          <strong>Préférences :</strong>
-          <ol className="list-decimal list-inside mt-1 space-y-1">
-            {entry.slots.map((slot, index) => (
-              <li key={index}>
-                {slot.day} de {slot.start}h à {slot.end}h
-              </li>
-            ))}
-          </ol>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
 
 
 {optimizationCompleted && (
