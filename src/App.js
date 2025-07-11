@@ -1040,8 +1040,7 @@ Imprimer le planning
 
 </div>
 </div>
-</div>
-</div>
+
 );
 }
 
