@@ -38,6 +38,22 @@ const students = [
 { name: "Blanc Axel", duration: 30 },
 { name: "Guerin Elise", duration: 45 }
 ];
+// 💡 Script temporaire pour importer tous les élèves dans Firestore
+const importStudentsToFirestore = async () => {
+  for (const student of students) {
+    try {
+      await addDoc(collection(db, 'eleves'), {
+        student: student.name,
+        duration: student.duration,
+        timestamp: new Date().toISOString(),
+        slots: []
+      });
+      console.log(`Ajouté : ${student.name}`);
+    } catch (error) {
+      console.error(`Erreur pour ${student.name} :`, error);
+    }
+  }
+};
 
 const timeSlots = {
 'Lundi': { start: 12, end: 20 },
