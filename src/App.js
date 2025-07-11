@@ -302,7 +302,8 @@ const satisfactionScore = finalSchedule.reduce((score, assignment) => {
     return score + (5 - assignment.preferenceRank);
   }
   return score;
-}, 0);
+}, 0); // 👈 ici on ajoute la valeur initiale du score à 0
+
 
 const maxPossibleScore = totalResponses * 4;
 const satisfactionPercentage = totalResponses > 0 ? Math.round((satisfactionScore / maxPossibleScore) * 100) : 0;
