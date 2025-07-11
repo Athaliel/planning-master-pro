@@ -277,6 +277,15 @@ return organized;
       setIsOptimizing(false);
     }, 2000);
   };
+// Calculs statistiques à afficher au prof
+const conflicts = finalSchedule.filter(a => a.status === 'conflit').length;
+
+const satisfactionScore = finalSchedule.reduce((score, assignment) => {
+  if (assignment.preferenceRank) {
+    return score + (5 - assignment.preferenceRank);
+  }
+  return score;
+}, 0);
 
   return (
     <div className="App">
@@ -385,6 +394,17 @@ className={'px-8 py-4 rounded-2xl font-semibold transition-all transform hover:s
 <Calendar className="w-5 h-5 inline mr-3" />
 Dashboard Professeur
 </button>
+
+<div className="mt-10 p-4 bg-white rounded-xl shadow-md border border-gray-200">
+  <h3 className="text-xl font-bold mb-2 text-gray-800 flex items-center gap-2">
+    <TrendingUp className="w-6 h-6 text-blue-600" />
+    Statistiques de planification
+  </h3>
+  <p className="text-gray-700 mb-1">Nombre de conflits détectés : <strong>{conflicts}</strong></p>
+  <p className="text-gray-700">Score global de satisfaction : <strong>{satisfactionScore}</strong> (plus il est élevé, mieux c’est)</p>
+</div>
+
+
 {optimizationCompleted && (
 <button
 onClick={() => setCurrentView('planning')}
