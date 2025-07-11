@@ -26,6 +26,8 @@ const [teacherPassword, setTeacherPassword] = useState('');
 const [showPassword, setShowPassword] = useState(false);
 const [loginError, setLoginError] = useState('');
 const [availableSlots, setAvailableSlots] = useState([]);
+const [inscriptions, setInscriptions] = useState([]);
+
 
 const TEACHER_PASSWORD = 'musique2025';
 
