@@ -133,21 +133,36 @@ setSelectedSlots([...selectedSlots, slot]);
 }
 };
 
-const saveStudentPreferences = () => {
-if (selectedStudent && selectedSlots.length === 4 && !hasSubmitted) {
-const duration = getStudentDuration(selectedStudent);
-setStudentPreferences({
-...studentPreferences,
-[selectedStudent]: {
-duration,
-slots: selectedSlots,
-timestamp: new Date().toISOString()
-}
-});
-setHasSubmitted(true);
-alert('Préférences enregistrées avec succès !');
-}
+const saveStudentPreferences = async () => {
+  if (selectedStudent && selectedSlots.length === 4 && !hasSubmitted) {
+    const duration = getStudentDuration(selectedStudent);
+
+    try {
+      await setDoc(doc(db, "preferences", selectedStudent), {
+        name: selectedStudent,
+        duration,
+        slots: selectedSlots,
+        timestamp: new Date().toISOString()
+      });
+
+      setStudentPreferences(prev => ({
+        ...prev,
+        [selectedStudent]: {
+          duration,
+          slots: selectedSlots,
+          timestamp: new Date().toISOString()
+        }
+      }));
+
+      setHasSubmitted(true);
+      alert('Préférences enregistrées avec succès dans Firestore !');
+    } catch (error) {
+      console.error("Erreur Firestore :", error);
+      alert("Erreur lors de l\'enregistrement. Vérifie ta connexion.");
+    }
+  }
 };
+
 
 const runGlobalOptimization = () => {
 setIsOptimizing(true);
