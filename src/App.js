@@ -4,40 +4,6 @@ import { db } from './firebase';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 export default function MusicScheduleOptimizer() {
-const students = [
-{ name: "Martin Léa", duration: 30 },
-{ name: "Dubois Tom", duration: 45 },
-{ name: "Bernard Emma", duration: 60 },
-{ name: "Petit Lucas", duration: 30 },
-{ name: "Robert Chloé", duration: 45 },
-{ name: "Richard Noah", duration: 60 },
-{ name: "Durand Inès", duration: 30 },
-{ name: "Moreau Hugo", duration: 45 },
-{ name: "Laurent Jade", duration: 60 },
-{ name: "Simon Enzo", duration: 30 },
-{ name: "Michel Lola", duration: 45 },
-{ name: "Lefebvre Mila", duration: 60 },
-{ name: "Leroy Nathan", duration: 30 },
-{ name: "Roux Zoé", duration: 45 },
-{ name: "David Evan", duration: 60 },
-{ name: "Bertrand Lina", duration: 30 },
-{ name: "Morel Théo", duration: 45 },
-{ name: "Fournier Alice", duration: 60 },
-{ name: "Girard Maël", duration: 30 },
-{ name: "Bonnet Clara", duration: 45 },
-{ name: "Dupont Louis", duration: 60 },
-{ name: "Lambert Nina", duration: 30 },
-{ name: "Fontaine Jules", duration: 45 },
-{ name: "Rousseau Léna", duration: 60 },
-{ name: "Vincent Oscar", duration: 30 },
-{ name: "Muller Ambre", duration: 45 },
-{ name: "Lefevre Gabriel", duration: 60 },
-{ name: "Faure Manon", duration: 30 },
-{ name: "Andre Raphaël", duration: 45 },
-{ name: "Mercier Lily", duration: 60 },
-{ name: "Blanc Axel", duration: 30 },
-{ name: "Guerin Elise", duration: 45 }
-];
 
 const timeSlots = {
 'Lundi': { start: 12, end: 20 },
