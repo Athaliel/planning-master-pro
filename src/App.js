@@ -293,7 +293,7 @@ return assignments;
 };
 
 const optimizedSchedule = optimizeSchedule();
-
+console.log(optimizedSchedule); // 👈 debug
 // Sauvegarde dans Firebase
 optimizedSchedule.forEach(async (entry) => {
   try {
