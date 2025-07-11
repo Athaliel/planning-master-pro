@@ -108,6 +108,45 @@ const student = students.find(s => s.name === studentName);
 return student ? student.duration : 30;
 };
 
+
+  const [students, setStudents] = useState([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      const snapshot = await getDocs(collection(db, "students"));
+      const list = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setStudents(list);
+    };
+    fetchStudents();
+  }, []);
+
+
+  const [studentPreferences, setStudentPreferences] = useState({});
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      const snapshot = await getDocs(collection(db, "preferences"));
+      const prefs = {};
+      snapshot.forEach(doc => {
+        prefs[doc.id] = doc.data();
+      });
+      
+    await setDoc(doc(db, "preferences", selectedStudent), {
+      name: selectedStudent,
+      duration,
+      slots: selectedSlots,
+      timestamp: new Date().toISOString()
+    });
+
+    setStudentPreferences(prefs);
+    };
+    fetchPreferences();
+  }, []);
+
+
 useEffect(() => {
 if (selectedStudent) {
 const duration = getStudentDuration(selectedStudent);
