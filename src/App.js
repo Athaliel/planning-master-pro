@@ -719,7 +719,6 @@ Lancer l'optimisation
 
 
 
-{optimizationCompleted && (
 
 {optimizationCompleted && (
 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
