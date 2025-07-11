@@ -453,6 +453,16 @@ Déconnexion
 </>
 )}
 </div>
+{isTeacherLoggedIn && (
+  <button
+    onClick={() => window.location.reload()}
+    className="ml-4 px-6 py-3 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+  >
+    Actualiser le planning
+  </button>
+)}
+
+
 
 {currentView === 'student' && (
 <div className="space-y-8">
