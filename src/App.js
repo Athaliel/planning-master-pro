@@ -14,7 +14,6 @@ const timeSlots = {
 
 const [currentView, setCurrentView] = useState('student');
 const [selectedStudent, setSelectedStudent] = useState('');
-const [studentPreferences, setStudentPreferences] = useState({});
 const [selectedSlots, setSelectedSlots] = useState([]);
 const [hasSubmitted, setHasSubmitted] = useState(false);
 const [optimizationCompleted, setOptimizationCompleted] = useState(false);
