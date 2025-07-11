@@ -680,28 +680,40 @@ Lancer l'optimisation
 </div>
 ) : (
 <div className="grid gap-4">
-{Object.entries(studentPreferences).map(([studentName, prefs]) => (
-<div key={studentName} className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-<div className="flex items-center justify-between mb-2">
-<h4 className="font-semibold text-gray-800">{studentName}</h4>
-<span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-{prefs.duration} min
-</span>
-</div>
-<div className="text-sm text-gray-600">
-<strong>Préférences :</strong>
-<ol className="list-decimal list-inside mt-1 space-y-1">
-{prefs.slots.map((slot, index) => (
-<li key={index}>{slot.display}</li>
-))}
-</ol>
-</div>
-</div>
-))}
-</div>
+{inscriptions.length === 0 ? (
+  <div className="text-center text-gray-500 space-y-2">
+    <Users className="w-16 h-16 mx-auto" />
+    <p className="text-gray-600 text-lg">Aucune inscription pour le moment</p>
+    <p className="text-gray-500">Les élèves peuvent s'inscrire via l'interface élève</p>
+  </div>
+) : (
+  <div className="grid gap-4">
+    {inscriptions.map((entry, index) => (
+      <div
+        key={index}
+        className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm"
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="font-semibold text-gray-800">{entry.student}</h4>
+          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+            {entry.duration} min
+          </span>
+        </div>
+        <div className="text-sm text-gray-600">
+          <strong>Préférences :</strong>
+          <ol className="list-decimal list-inside mt-1 space-y-1">
+            {entry.slots.map((slot, index) => (
+              <li key={index}>
+                {slot.day} de {slot.start}h à {slot.end}h
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    ))}
+  </div>
 )}
-</div>
-</div>
+
 
 {optimizationCompleted && (
 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
