@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Users, CheckCircle, AlertCircle, Music, Piano, UserCheck, UserX, TrendingUp, Play, FileText, Lock, Eye, EyeOff, Star, Target, Lightbulb } from 'lucide-react';
 import { db } from './firebase';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
+
 
 export default function MusicScheduleOptimizer() {
 
