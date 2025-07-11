@@ -713,7 +713,23 @@ Lancer l'optimisation
     ))}
   </div>
 )}
+        <div className="text-sm text-gray-600">
+          <strong>Préférences :</strong>
+          <ol className="list-decimal list-inside mt-1 space-y-1">
+            {entry.slots.map((slot, index) => (
+              <li key={index}>
+                {slot.day} de {slot.start}h à {slot.end}h
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
+
+{optimizationCompleted && (
 
 {optimizationCompleted && (
 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
