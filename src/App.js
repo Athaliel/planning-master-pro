@@ -4,7 +4,6 @@ import { db } from './firebase';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { doc, setDoc } from 'firebase/firestore';
 
-
 export default function MusicScheduleOptimizer() {
 
 const timeSlots = {
@@ -27,6 +26,9 @@ const [showPassword, setShowPassword] = useState(false);
 const [loginError, setLoginError] = useState('');
 const [availableSlots, setAvailableSlots] = useState([]);
 const [inscriptions, setInscriptions] = useState([]);
+const [students, setStudents] = useState([]);
+const [studentPreferences, setStudentPreferences] = useState({});
+
 useEffect(() => {
   const fetchInscriptions = async () => {
     try {
@@ -45,7 +47,6 @@ useEffect(() => {
     fetchInscriptions();
   }
 }, [isTeacherLoggedIn]);
-
 
 const TEACHER_PASSWORD = 'musique2025';
 
@@ -95,44 +96,29 @@ const student = students.find(s => s.name === studentName);
 return student ? student.duration : 30;
 };
 
+useEffect(() => {
+const fetchStudents = async () => {
+  const snapshot = await getDocs(collection(db, "students"));
+  const list = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+  setStudents(list);
+};
+fetchStudents();
+}, []);
 
-  const [students, setStudents] = useState([]);
-
-  useEffect(() => {
-    const fetchStudents = async () => {
-      const snapshot = await getDocs(collection(db, "students"));
-      const list = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setStudents(list);
-    };
-    fetchStudents();
-  }, []);
-
-
-  const [studentPreferences, setStudentPreferences] = useState({});
-
-  useEffect(() => {
-    const fetchPreferences = async () => {
-      const snapshot = await getDocs(collection(db, "preferences"));
-      const prefs = {};
-      snapshot.forEach(doc => {
-        prefs[doc.id] = doc.data();
-      });
-      
-    await setDoc(doc(db, "preferences", selectedStudent), {
-      name: selectedStudent,
-      duration,
-      slots: selectedSlots,
-      timestamp: new Date().toISOString()
-    });
-
-    setStudentPreferences(prefs);
-    };
-    fetchPreferences();
-  }, []);
-
+useEffect(() => {
+const fetchPreferences = async () => {
+  const snapshot = await getDocs(collection(db, "preferences"));
+  const prefs = {};
+  snapshot.forEach(doc => {
+    prefs[doc.id] = doc.data();
+  });
+  setStudentPreferences(prefs);
+};
+fetchPreferences();
+}, []);
 
 useEffect(() => {
 if (selectedStudent) {
@@ -178,11 +164,10 @@ const saveStudentPreferences = async () => {
       alert('Préférences enregistrées avec succès dans Firestore !');
     } catch (error) {
       console.error("Erreur Firestore :", error);
-      alert("Erreur lors de l\'enregistrement. Vérifie ta connexion.");
+      alert("Erreur lors de l'enregistrement. Vérifie ta connexion.");
     }
   }
 };
-
 
 const runGlobalOptimization = () => {
 setIsOptimizing(true);
@@ -687,365 +672,77 @@ Lancer l'optimisation
     <p className="text-gray-500">Les élèves peuvent s'inscrire via l'interface élève</p>
   </div>
 ) : (
-  <div className="grid gap-4">
-<div className="mt-10">
-  <h3 className="text-xl font-bold mb-4">Préférences des élèves</h3>
-  {inscriptions.length === 0 ? (
-    <p className="text-gray-500">Aucune inscription enregistrée.</p>
-  ) : (
-    <ul className="space-y-4">
-      {inscriptions.map((entry, index) => (
-        <li
-          key={index}
-          className="bg-white rounded-xl shadow-md p-4 border border-gray-200"
-        >
-          <p className="font-semibold text-red-700">{entry.student}</p>
-          <p className="text-sm text-gray-600 mb-1">
-            Durée : {entry.duration} minutes
-          </p>
-          <p className="text-sm text-gray-600">Préférences :</p>
-          <ul className="list-disc list-inside text-sm text-gray-800">
-            {entry.slots.map((slot, i) => (
-              <li key={i}>
-                Choix {i + 1} : {slot.day} de {slot.start}h à {slot.end}h
-              </li>
-            ))}
-          </ul>
-        </li>
-      ))}
-    </ul>
-  )}
+<div className="grid gap-4">
+  <div className="mt-10">
+    <h3 className="text-xl font-bold mb-4">Préférences des élèves</h3>
+    {inscriptions.length === 0 ? (
+      <p className="text-gray-500">Aucune inscription enregistrée.</p>
+    ) : (
+      <ul className="space-y-4">
+        {inscriptions.map((entry, index) => (
+          <li
+            key={index}
+            className="bg-white rounded-xl shadow-md p-4 border border-gray-200"
+          >
+            <p className="font-semibold text-red-700">{entry.name}</p>
+            <p className="text-sm text-gray-600 mb-1">
+              Durée : {entry.duration} minutes
+            </p>
+            <p className="text-sm text-gray-600">Préférences :</p>
+            <ul className="list-disc list-inside text-sm text-gray-800">
+              {entry.slots.map((slot, i) => (
+                <li key={i}>
+                  Choix {i + 1} : {slot.display}
+                </li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
 </div>
-
-
-
 
 {optimizationCompleted && (
-<div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
-<h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-<CheckCircle className="w-6 h-6 text-green-600" />
-Résultats de l'optimisation
-</h3>
+  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
+    <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+      <CheckCircle className="w-6 h-6 text-green-600" />
+      Résultats de l'optimisation
+    </h3>
 
-<div className="grid gap-4">
-<div className="bg-white p-4 rounded-xl border border-gray-200">
-<h4 className="font-semibold text-gray-800 mb-3">Attributions réussies ({successfulAssignments})</h4>
-{finalSchedule
-.filter(assignment => assignment.slot)
-.map((assignment, index) => (
-<div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-<span className="font-medium">{assignment.student}</span>
-<div className="text-right">
-<div className="text-sm font-medium">{assignment.slot.display}</div>
-<div className="text-xs text-gray-500">
-{assignment.preferenceRank}er choix - {assignment.duration} min
-</div>
-</div>
-</div>
-))}
-</div>
+    <div className="grid gap-4">
+      <div className="bg-white p-4 rounded-xl border border-gray-200">
+        <h4 className="font-semibold text-gray-800 mb-3">Attributions réussies ({successfulAssignments})</h4>
+        {finalSchedule
+          .filter(assignment => assignment.slot)
+          .map((assignment, index) => (
+            <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+              <span className="font-medium">{assignment.student}</span>
+              <div className="text-right">
+                <div className="text-sm font-medium">{assignment.slot.display}</div>
+                <div className="text-xs text-gray-500">
+                  {assignment.preferenceRank}er choix - {assignment.duration} min
+                </div>
+              </div>
+            </div>
+          ))}
+      </div>
 
-{conflicts > 0 && (
-<div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-<h4 className="font-semibold text-red-800 mb-3">Conflits à résoudre ({conflicts})</h4>
-{finalSchedule
-.filter(assignment => assignment.status === 'conflit')
-.map((assignment, index) => (
-<div key={index} className="flex items-center justify-between py-2 border-b border-red-200 last:border-b-0">
-<span className="font-medium text-red-700">{assignment.student}</span>
-<span className="text-sm text-red-600">Contact nécessaire</span>
-</div>
-))}
-</div>
+      {conflicts > 0 && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+          <h4 className="font-semibold text-red-800 mb-3">Conflits à résoudre ({conflicts})</h4>
+          {finalSchedule
+            .filter(assignment => assignment.status === 'conflit')
+            .map((assignment, index) => (
+              <div key={index} className="flex items-center justify-between py-2 border-b border-red-200 last:border-b-0">
+                <span className="font-medium text-red-700">{assignment.student}</span>
+                <span className="text-sm text-red-600">Contact nécessaire</span>
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  </div>
 )}
 </div>
-</div>
 )}
-</div>
-)}
-
-{currentView === 'planning' && optimizationCompleted && (
-<div className="space-y-8">
-{/* Planning par jour /}
-<div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
-<h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-<Calendar className="w-6 h-6 text-green-600" />
-Planning Final Optimisé - Vue par Jour
-</h3>
-
-<div className="grid gap-6">
-{Object.entries(timeSlots).map(([day, hours]) => {
-const dayAssignments = organizedSchedule[day] || [];
-const timeSlotHours = [];
-
-// Créer les créneaux horaires par pas de 30 minutes
-for (let hour = hours.start; hour < hours.end; hour++) {
-for (let minute = 0; minute < 60; minute += 30) {
-if (hour + minute/60 < hours.end) {
-const timeStr = ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')};
-const endHour = minute === 30 ? hour + 1 : hour;
-const endMinute = minute === 30 ? 0 : 30;
-const endTimeStr = ${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')};
-
-// Vérifier s'il y a un cours à ce créneau
-const assignment = dayAssignments.find(a => {
-const startTime = a.slot.startTime;
-const endTime = a.slot.endTime;
-return startTime <= timeStr && endTime > timeStr;
-});
-
-timeSlotHours.push({
-time: timeStr,
-endTime: endTimeStr,
-assignment
-});
-}
-}
-}
-
-return (
-<div key={day} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-<h4 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-<Clock className="w-5 h-5 text-blue-600" />
-{day} ({hours.start}h - {hours.end}h)
-</h4>
-
-<div className="grid gap-2">
-{timeSlotHours.map((slot, index) => (
-<div key={index} className={p-3 rounded-lg border transition-all ${                                 slot.assignment                                    ? 'bg-gradient-to-r from-blue-100 to-indigo-100 border-blue-300'                                    : 'bg-gray-50 border-gray-200'                               }}>
-<div className="flex items-center justify-between">
-<div className="font-mono text-sm font-semibold text-gray-700">
-{slot.time} - {slot.endTime}
-</div>
-{slot.assignment ? (
-<div className="flex items-center gap-4">
-<div>
-<div className="font-semibold text-blue-800">
-{slot.assignment.student}
-</div>
-<div className="text-xs text-blue-600">
-{slot.assignment.duration}min - {slot.assignment.preferenceRank}er choix
-</div>
-</div>
-<div className="w-3 h-3 bg-green-500 rounded-full"></div>
-</div>
-) : (
-<div className="text-gray-400 text-sm">Libre</div>
-)}
-</div>
-</div>
-))}
-</div>
-
-<div className="mt-4 p-3 bg-blue-50 rounded-lg">
-<div className="text-sm text-blue-800">
-<strong>Résumé :</strong> {dayAssignments.length} cours programmés
-{dayAssignments.length > 0 && (
-<span> • Durée totale : {dayAssignments.reduce((total, a) => total + a.duration, 0)} minutes</span>
-)}
-</div>
-</div>
-</div>
-);
-})}
-</div>
-</div>
-
-{/ Analyse des conflits /}
-{conflicts > 0 && (
-<div className="bg-gradient-to-r from-red-50 to-orange-50 p-8 rounded-2xl border border-red-200">
-<h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-<AlertCircle className="w-6 h-6 text-red-600" />
-Analyse des Conflits et Solutions Proposées
-</h3>
-
-<div className="space-y-6">
-{finalSchedule
-.filter(assignment => assignment.status === 'conflit')
-.map((conflictAssignment, index) => {
-// Analyser pourquoi il y a conflit
-const allOtherAssignments = finalSchedule.filter(a => a.slot && a.student !== conflictAssignment.student);
-const conflictAnalysis = [];
-
-conflictAssignment.preferences.forEach((preferredSlot, prefIndex) => {
-const conflictingAssignment = allOtherAssignments.find(a => {
-if (a.slot.day !== preferredSlot.day) return false;
-const start1 = parseInt(a.slot.startTime.replace(':', ''));
-const end1 = parseInt(a.slot.endTime.replace(':', ''));
-const start2 = parseInt(preferredSlot.startTime.replace(':', ''));
-const end2 = parseInt(preferredSlot.endTime.replace(':', ''));
-return !(end1 <= start2 || end2 <= start1);
-});
-
-conflictAnalysis.push({
-preference: prefIndex + 1,
-slot: preferredSlot,
-conflictWith: conflictingAssignment,
-isAvailable: !conflictingAssignment
-});
-});
-
-// Proposer des solutions
-const availableSlots = generateTimeSlots(conflictAssignment.duration)
-.filter(slot => {
-return !allOtherAssignments.some(a => {
-if (a.slot.day !== slot.day) return false;
-const start1 = parseInt(a.slot.startTime.replace(':', ''));
-const end1 = parseInt(a.slot.endTime.replace(':', ''));
-const start2 = parseInt(slot.startTime.replace(':', ''));
-const end2 = parseInt(slot.endTime.replace(':', ''));
-return !(end1 <= start2 || end2 <= start1);
-});
-})
-.slice(0, 5); // Limiter à 5 suggestions
-
-return (
-<div key={index} className="bg-white p-6 rounded-2xl border border-red-200 shadow-sm">
-<h4 className="text-lg font-bold text-red-800 mb-4 flex items-center gap-2">
-<Target className="w-5 h-5" />
-Conflit : {conflictAssignment.student} ({conflictAssignment.duration} minutes)
-</h4>
-
-{/ Analyse des préférences /}
-<div className="mb-6">
-<h5 className="font-semibold text-gray-800 mb-3">Analyse des préférences :</h5>
-<div className="space-y-2">
-{conflictAnalysis.map((analysis, idx) => (
-<div key={idx} className={p-3 rounded-lg border ${                                       analysis.isAvailable                                          ? 'bg-green-50 border-green-200'                                          : 'bg-red-50 border-red-200'                                     }}>
-<div className="flex items-center justify-between">
-<div>
-<span className="font-medium">
-{analysis.preference}er choix : {analysis.slot.display}
-</span>
-</div>
-<div>
-{analysis.isAvailable ? (
-<span className="text-green-600 font-medium">✓ Disponible</span>
-) : (
-<span className="text-red-600 font-medium">
-✗ Occupé par {analysis.conflictWith.student}
-</span>
-)}
-</div>
-</div>
-</div>
-))}
-</div>
-</div>
-
-{/ Solutions proposées /}
-<div className="mb-4">
-<h5 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-<Lightbulb className="w-5 h-5 text-yellow-500" />
-Solutions proposées :
-</h5>
-
-{availableSlots.length > 0 ? (
-<div className="space-y-2">
-<div className="grid gap-2">
-{availableSlots.map((solution, sIdx) => (
-<div key={sIdx} className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-<div className="flex items-center justify-between">
-<span className="font-medium text-yellow-800">
-Option {sIdx + 1} : {solution.display}
-</span>
-<button className="bg-yellow-500 text-white px-3 py-1 rounded-lg text-sm font-medium hover:bg-yellow-600 transition-colors">
-Assigner
-</button>
-</div>
-</div>
-))}
-</div>
-</div>
-) : (
-<div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-<p className="text-gray-600">
-Aucun créneau disponible pour cette durée.
-<strong> Actions recommandées :</strong>
-</p>
-<ul className="list-disc list-inside mt-2 text-gray-600 space-y-1">
-<li>Contact direct avec l'élève pour négocier un autre créneau</li>
-<li>Proposer de modifier la durée du cours (si possible)</li>
-<li>Réorganiser d'autres créneaux pour libérer de la place</li>
-<li>Proposer un cours en dehors des créneaux préférés</li>
-</ul>
-</div>
-)}
-</div>
-
-{/ Actions rapides /}
-<div className="flex gap-2 pt-4 border-t border-gray-200">
-<button className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
-Contacter l'élève
-</button>
-<button className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors">
-Réoptimiser
-</button>
-<button className="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-600 transition-colors">
-Reporter
-</button>
-</div>
-</div>
-);
-})}
-</div>
-
-{/ Recommandations générales /}
-<div className="mt-6 p-6 bg-orange-50 border border-orange-200 rounded-2xl">
-<h5 className="font-bold text-orange-800 mb-3 flex items-center gap-2">
-<Star className="w-5 h-5" />
-Recommandations pour réduire les conflits futurs :
-</h5>
-<ul className="list-disc list-inside space-y-2 text-orange-700">
-<li>Élargir les plages horaires disponibles si possible</li>
-<li>Encourager les élèves à diversifier leurs préférences</li>
-<li>Considérer des cours de durées variables selon la demande</li>
-<li>Implémenter un système de priorité pour les élèves anciens</li>
-<li>Proposer des créneaux alternatifs attractifs</li>
-</ul>
-</div>
-</div>
-)}
-
-{/ Actions sur le planning */}
-<div className="flex gap-4 justify-center">
-<button
-onClick={() => window.print()}
-className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-blue-600 hover:to-cyan-600 transition-all transform hover:scale-105 shadow-xl"
->
-<FileText className="w-5 h-5 inline mr-3" />
-Imprimer le planning
-</button>
-<button
-  onClick={() => {
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      "Élève,Jour,Heure début,Heure fin,Durée,Préférence\n" +
-      finalSchedule
-        .filter((a) => a.slot)
-        .map(
-          (a) =>
-            `${a.student},${a.slot.day},${a.slot.startTime},${a.slot.endTime},${a.duration},${a.preferenceRank}`
-        )
-        .join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "planning_cours_musique.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }}
->
-  Exporter CSV
-</button>
-</div>
-</div>
-)}
-
-</div>
-</div>
-
-);
-}
-
