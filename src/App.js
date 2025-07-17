@@ -283,7 +283,6 @@ const maxPossibleScore = totalResponses * 4;
 const satisfactionPercentage = totalResponses > 0 ? Math.round((satisfactionScore / maxPossibleScore) * 100) : 0;
 
 return (
-  <>
 <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
 <div className="relative">
 <div className="h-52 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 relative overflow-hidden">
@@ -495,7 +494,6 @@ className={'p-4 text-sm font-medium rounded-xl border transition-all transform h
 )}
 {slot.display}
 </button>
-  </>
 );
 })}
 </div>
