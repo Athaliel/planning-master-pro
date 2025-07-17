@@ -679,70 +679,74 @@ Lancer l'optimisation
       <p className="text-gray-500">Aucune inscription enregistrée.</p>
     ) : (
       <ul className="space-y-4">
-        {inscriptions.map((entry, index) => (
-          <li
-            key={index}
-            className="bg-white rounded-xl shadow-md p-4 border border-gray-200"
-          >
-            <p className="font-semibold text-red-700">{entry.name}</p>
-            <p className="text-sm text-gray-600 mb-1">
-              Durée : {entry.duration} minutes
-            </p>
-            <p className="text-sm text-gray-600">Préférences :</p>
-            <ul className="list-disc list-inside text-sm text-gray-800">
-              {entry.slots.map((slot, i) => (
-                <li key={i}>
-                  Choix {i + 1} : {slot.display}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-</div>
+         {inscriptions.map((entry, index) => (
+                  <div key={index} className="bg-white p-4 rounded-xl border border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-gray-800">{entry.name}</span>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-600">
+                          {entry.duration} minutes
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {new Date(entry.timestamp).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600 mb-2">Préférences :</div>
+                    <div className="space-y-1">
+                      {entry.slots.map((slot, i) => (
+                        <div key={i} className="text-sm text-gray-700 bg-gray-50 px-2 py-1 rounded">
+                          <span className="font-medium">{i + 1}.</span> {slot.display}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-{optimizationCompleted && (
-  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
-    <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
-      <CheckCircle className="w-6 h-6 text-green-600" />
-      Résultats de l'optimisation
-    </h3>
+          {optimizationCompleted && (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200">
+              <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-green-600" />
+                Résultats de l'optimisation
+              </h3>
 
-    <div className="grid gap-4">
-      <div className="bg-white p-4 rounded-xl border border-gray-200">
-        <h4 className="font-semibold text-gray-800 mb-3">Attributions réussies ({successfulAssignments})</h4>
-        {finalSchedule
-          .filter(assignment => assignment.slot)
-          .map((assignment, index) => (
-            <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
-              <span className="font-medium">{assignment.student}</span>
-              <div className="text-right">
-                <div className="text-sm font-medium">{assignment.slot.display}</div>
-                <div className="text-xs text-gray-500">
-                  {assignment.preferenceRank}er choix - {assignment.duration} min
+              <div className="grid gap-4">
+                <div className="bg-white p-4 rounded-xl border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-3">Attributions réussies ({successfulAssignments})</h4>
+                  {finalSchedule
+                    .filter(assignment => assignment.slot)
+                    .map((assignment, index) => (
+                      <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                        <span className="font-medium">{assignment.student}</span>
+                        <div className="text-right">
+                          <div className="text-sm font-medium">{assignment.slot.display}</div>
+                          <div className="text-xs text-gray-500">
+                            {assignment.preferenceRank}er choix - {assignment.duration} min
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                 </div>
+
+                {conflicts > 0 && (
+                  <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
+                    <h4 className="font-semibold text-red-800 mb-3">Conflits à résoudre ({conflicts})</h4>
+                    {finalSchedule
+                      .filter(assignment => assignment.status === 'conflit')
+                      .map((assignment, index) => (
+                        <div key={index} className="flex items-center justify-between py-2 border-b border-red-200 last:border-b-0">
+                          <span className="font-medium text-red-700">{assignment.student}</span>
+                          <span className="text-sm text-red-600">Contact nécessaire</span>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             </div>
-          ))}
-      </div>
-
-      {conflicts > 0 && (
-        <div className="bg-red-50 border border-red-200 p-4 rounded-xl">
-          <h4 className="font-semibold text-red-800 mb-3">Conflits à résoudre ({conflicts})</h4>
-          {finalSchedule
-            .filter(assignment => assignment.status === 'conflit')
-            .map((assignment, index) => (
-              <div key={index} className="flex items-center justify-between py-2 border-b border-red-200 last:border-b-0">
-                <span className="font-medium text-red-700">{assignment.student}</span>
-                <span className="text-sm text-red-600">Contact nécessaire</span>
-              </div>
-            ))}
+          )}
         </div>
       )}
     </div>
-  </div>
-)}
-</div>
-)}
